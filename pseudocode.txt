@@ -1,0 +1,147 @@
+
+
+
+function Fight(){
+
+    this.heroBaseAttackPower = 0;
+    this.heroAttackPower = 0;
+    this.heroBaseHealth = 0;
+    this.heroHeath = 0;
+    
+    this.villianBaseAttackPower = 0;
+    this.villianAttackPower = 0;
+    this.villianBaseHealth = 0;
+    this.villianHeath = 0;
+
+
+    this.init = function (hero, villian) {
+        this.heroBaseAttackPower = 0;
+        this.heroAttackPower = 0;
+        this.heroBaseHealth = 0;
+        this.heroHeath = 0;
+        
+        this.villianBaseAttackPower = 0;
+        this.villianAttackPower = 0;
+        this.villianBaseHealth = 0;
+        this.villianHeath = 0;
+
+    }
+
+    this.attack = function ()
+
+}
+
+
+/*
+
+
+
+    characterlist = listof character objects  // keeping orignal copy for reference.  
+
+    opponenentlist = characterlist copy  (array.slice(0))
+    //  var clone = myArray.slice(0);   to copy
+    //
+    //  to slice
+    // araylist  ["a", "b", "c", "d", "e"]
+    // newvalue = araylist.slice(0,1)
+    // newvalue = araylist.slice(0,1)[0]
+
+
+    defeatedlist = []
+
+
+create function match()
+
+
+
+    yourCharacter = object in characterlist  {
+        Name:
+        Description:
+        BaseHealthPoints:
+        BaseAttackPower: 
+        currentAttackPower:
+        CurrentHealth: 
+        CounterAttackPower:
+        strikes
+    }
+
+    yourOpponent =  object in characterlist {
+
+    }
+
+    stillAlive = True
+    MatchStarted = False
+    MatchOver = False
+    winAllMatches = False
+    strikescnt = 0;
+
+
+    function selectYourCharacter( index of character)
+        inf index > opponentlist.length, print charlist
+        slice off opponenentlist
+        assign opponenentlist[x] to yourCharacter
+
+    function selectYourOpponent(index of character)
+        inf index > opponentlist.length, print charlist
+        slice off opponenentlist
+        assign opponenentlist[x] to yourOpponent
+
+    function attackYourOpponent()
+        // yourhealth = 
+        // yourattack = 
+        // opponenthealth = 
+        // opponentcounterattack = 
+
+        // check if you have a character , else return (" you don't exist)
+        // check if you have an opponent, else return ("No opopontnet")
+        // check if MatchOver, return ()
+
+
+        // you guys both lose points by hitting each other
+        opponenthealth -= currentAttackPower
+        yourhealth -= opponent.counterAttackPower
+
+        // let's see who is still stillAlive
+        if (opponethealth <= 0) {
+            matchover = True
+        }
+
+        if (yourhealth <= 0) {
+            matchover = true 
+        }
+
+        //  if still stillAlive
+        attackpower += baseAttackPower
+
+
+
+
+
+
+
+
+
+characterlist
+
+yourCharacter
+opponent 
+
+opponenentlist
+defeatedList
+
+newRPG = new RPG()
+
+newRPG.youcharacter(A)
+newRPG.opponent(B)
+newbattle.infight = True
+if (newRPG.attack()):
+    // determine winner
+    // move opponent to defeatedlist
+
+
+
+
+*/
+
+
+
