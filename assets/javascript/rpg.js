@@ -1,21 +1,21 @@
 // csv to json , created listed in excel and saved as csv 
 // https://www.csvjson.com/csv2json
 
-var PlayerList = [
+var playerList = [
     {
         "name": "Konor",
         "descripton": "",
-        "baseAttackPower": 10,
-        "curAttackPower": 10,
+        "baseAttackPower": 4,
+        "curAttackPower": 4,
         "baseHealth": 100,
         "curHealth": 100,
-        "counterAttack": 10
+        "counterAttack": 4,
     },
     {
         "name": "Farrah",
         "descripton": "",
-        "baseAttackPower": 6,
-        "curAttackPower": 6,
+        "baseAttackPower": 3,
+        "curAttackPower": 3,
         "baseHealth": 100,
         "curHealth": 100,
         "counterAttack": 6
@@ -41,7 +41,10 @@ var PlayerList = [
 ]
 
 // initialize global varaibles
-var activePlayerList = PlayerList.slice();  // make copy of array, one character
+// below was a super clever way to deep copy array of objects, just change it to json and back
+// https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
+
+var activeplayerList = JSON.parse(JSON.stringify(playerList));  /// make a deep copy of original
 var match = new Fight();
 var hero = {};
 var badguy = {};
@@ -50,6 +53,19 @@ var defeatedList = [];
 //////////////////////////////////////////////////////////////////////////////////
 // draw functions are used to update the screen. They are called by the functions in onclick
 //
+
+// clear badguy screen
+function clearDefenderDiv(divID) {
+    htmlstring = "";
+    htmlstring = htmlstring + '<div class="row"><button id="attack">ATTACK</button></div>';
+    $(divID).html(htmlstring);
+}
+
+// clear hero row and defender row
+function clearDrawings(){
+    $('#enemyRow').html("Hero Row");
+    $('#defender').html("");
+}
 
 function drawCharList(userList, divID) {
     // draw something with attribute of "fighterId" with value of array index for jquery
@@ -78,8 +94,8 @@ function drawDefender(divID) {
 function drawEnemyRow(divID) {
     // draw something with attribute of "badguyId" with value of array index for jquery
     var htmlstring = ""
-    for (var i = 0; i < activePlayerList.length; i++) {
-        htmlstring = htmlstring + "<div class='col-sm-2'><button class='badguy' badguyId = '" + i + "'>" + activePlayerList[i].name + "</button></div>";
+    for (var i = 0; i < activeplayerList.length; i++) {
+        htmlstring = htmlstring + "<div class='col-sm-2'><button class='badguy' badguyId = '" + i + "'>" + activeplayerList[i].name + "</button></div>";
     }
     $(divID).html(htmlstring);
 }
@@ -92,21 +108,22 @@ function selectHero() {
     // game screen state 1:  
 
     console.log("---> select hero function");
-    console.log("BEFORE: ", activePlayerList);
+    console.log("BEFORE: ", activeplayerList);
+
     // extract hero id from attrivute figherId of clicked object
     fighterId = parseInt($(this).attr("fighterId"));
     console.log("fighterId: ", fighterId)
 
     // set Hero global variable for battle 
-    hero = PlayerList[fighterId];
+    hero = activeplayerList[fighterId];
     match.enterHero(hero);
     console.log("fighter ", hero)
 
-    // update activePlayerList by remvoing hero character
+    // update activeplayerList by remvoing hero character
     // enemy list is a copy of characterlist
 
-    activePlayerList.splice(fighterId, 1);
-    console.log("AFTER: ", activePlayerList);
+    activeplayerList.splice(fighterId, 1);
+    console.log("AFTER: ", activeplayerList);
 
     // draw hero row 
     drawHero("#herorow");
@@ -126,13 +143,13 @@ function selectBadGuy() {
     badguyId = parseInt($(this).attr("badguyId"));
 
     // set Hero global variable for battle 
-    badguy = activePlayerList[badguyId];
+    badguy = activeplayerList[badguyId];
     match.enterVillian(badguy);
     console.log("defender", badguy)
 
-    // update activePlayerList by extracting selected badguy
-    activePlayerList.splice(badguyId, 1);
-    console.log(activePlayerList);
+    // update activeplayerList by extracting selected badguy
+    activeplayerList.splice(badguyId, 1);
+    console.log(activeplayerList);
 
     // draw defender row, this is the bad guy line
     drawDefender("#defender");
@@ -148,21 +165,25 @@ function selectAttack() {
     // game screen state 3:  
     console.log("----> attack function")
 
-    if (match.heroAlive) {
-        if (match.villianAlive) {
-            // attack
-            match.heroAttack();
+    if (!match.newVillianAlive) {
+        if (activeplayerList.length === 0) {
+            alert("you did it!  you killed them all!!")
         } else {
-            alert("You beat him already!");
+            alert("Pick someone else to fight!")
+        }
+    } else if (match.newHeroAlive) {
+        match.newHeroAttack();
+        if (!match.newVillianAlive) {
+            alert("you did it!  he's dead!")
             defeatedList.push(badguy);
+            badguy = {};
+            clearDefenderDiv("#defender");
+            if (activeplayerList.length === 0) {
+                alert("you did it!  you killed them all!!")
+            }
         }
     } else {
-        if (!match.villianAlive) {
-            alert("Wow!  You died AND your opponent died!  What a battle! ")
-        } else {
-            alert("Sorry you aren't alive! ");
-        }
-
+        alert("Sorry you aren't alive! ");
     }
 
 
@@ -171,18 +192,20 @@ function selectAttack() {
 
 // reset game
 function resetGame() {
-    list = PlayerList;
     divID = "#herorow";
-
-    activePlayerList = list.slice();
-    drawCharList(list, divID);
+    activeplayerList = JSON.parse(JSON.stringify(playerList));  /// make a deep copy of original
+    console.log(activeplayerList)
+    drawCharList(playerList, divID);
     match = new Fight();
     match.init();
     hero = {};
     badguy = {};
-    $('#enemyRow').html("Hero Row");
-    $('#defender').html("");
+    defeatedList = [];
+    clearDrawings();
+
 }
+
+
 
 //////////////////////////////////////////////////////////////////////////////////
 //   setup the onclick functions 
@@ -191,17 +214,8 @@ function resetGame() {
 $(document).ready(function () {
 
     console.log("Testing Javascript Load");
-    console.log(PlayerList);
-    console.log(activePlayerList);
-
-    // fight below example
-    /*
-    match.init();
-    hero = PlayerList[0];
-    badguy = PlayerList[1];
-    match.enterHero(hero);
-    match.enterVillian(badguy);
-    */
+    console.log(playerList);
+    console.log(activeplayerList);
 
     // reset name with the characters specified
     resetGame();
@@ -212,8 +226,7 @@ $(document).ready(function () {
 
     $('body').on("click", '#restart', function () {
         resetGame();
-        bindEventHandlers();
-
+        bindEventHandlers();  // release event handlers and add new ones based on selection
     });
 
 
@@ -259,84 +272,61 @@ $(document).ready(function () {
 function Fight() {
 
     this.init = function () {
-        this.heroBaseAttackPower = 0;
-        this.heroAttackPower = 0;  // will increase
-        this.heroBaseHealth = 0;
-        this.heroHealth = 0;   // will decrease
-        this.heroCounterAttack = 0
-
-        this.villianBaseAttackPower = 0;
-        this.villianAttackPower = 0;  // will increase with battle
-        this.villianBaseHealth = 0;
-        this.villianHealth = 0;  // will derease
-        this.villianCounterAttack = 0
-
-        this.heroAlive = false;
-        this.villianAlive = false;
+        this.newHero = {}
+        this.newVillian = {}
+        this.newHeroAlive = false;
+        this.newVillianAlive = false;
+        this.newVillianCounterAttack = 0;
     }
 
     this.enterHero = function (hero) {
-        this.heroBaseAttackPower = hero.baseAttackPower;
-        this.heroAttackPower = hero.baseAttackPower;
-        this.heroBaseHealth = hero.baseHealth;
-        this.heroHealth = hero.baseHealth;
-        this.heroCounterAttack = hero.counterAttack;
-
-        this.heroAlive = true;
-        console.log("hero is: ", hero);
-    }
-
-    this.updateStats = function () {
-        hero.curAttackPower = this.heroAttackPower
-        hero.curHealth = this.heroHealth 
+        this.newHero = hero; // make a copy
+        this.newHeroAlive = true;
+        console.log("hero is: ", this.newHero);
     }
 
     this.enterVillian = function (villian) {
-        this.villianBaseAttackPower = villian.baseAttackPower;
-        this.villianAttackPower = villian.baseAttackPower;
-        this.villianBaseHealth = villian.baseHealth;
-        this.villianHealth = villian.baseHealth;
-        this.villianCounterAttack = villian.counterAttack;
-
-        this.villianAlive = true;
-
-        console.log("villian is: ", villian);
+        this.newVillian = villian;  // make a copy
+        this.newVillianAlive = true;
+        console.log("villian is: ", this.newVillian);
     }
 
-    this.heroAttack = function () {
-        if (this.heroAlive) {
-            // hero attacks
-            this.villianHealth -= this.heroAttackPower;
+    this.newHeroAttack = function () {
+        if (this.newHeroAlive) {
+            // villians' health is reduced by Hero's attack Power
+            this.newVillian.curHealth -= this.newHero.curAttackPower;
 
-            // mark hero as dead if his healthpoint is <= 1
-            if (this.villianHealth <= 0) {
-                this.villianAlive = false;
+            // mark villian as dead if his healthpoint is <= 0
+            if (this.newVillian.curHealth <= 0) {
+                this.newVillianAlive = false;
                 console.log("YOu killed the bad guy!")
+            } else {
+                // if alive, counterattack power is his
+                console.log(this.newVillian);
+                this.newVillianCounterAttack = this.newVillian.counterAttack;
+                console.log("counterattack here??", this.newVillianCounterAttack)
             }
 
-            // villiancounters only if he is alive (this will allow for overkill)
-            if (this.villianAlive) {
-                this.heroHealth -= this.villianCounterAttack;
+            // if villian is alive, hero's health is reduced by counter attack!
+            if (this.newVillianAlive) {
+                this.newHero.curHealth -= this.newVillianCounterAttack;
             }
 
+            // is hero dead yet? 
+            if (this.newHero.curHealth <= 0) {
+                this.newHeroAlive = false;
+                console.log("You got your but whooped")
+            }
 
             // log results
-            console.log("hero attack: " + this.heroAttackPower + " villian attack: " + this.villianCounterAttack);
-            console.log("hero health: " + this.heroHealth + "  villian health: " + this.villianHealth);
+            console.log("hero attack: " + this.newHero.curAttackPower + " villian attack: " + this.newVillianCounterAttack);
+            console.log("hero health: " + this.newHero.curHealth + "  villian health: " + this.newVillian.curHealth);
 
             // hero attack becomes stronger only if villian is alive (allow for overkill)
             // not fair to become more powerful beating on a dead guy
-            if (this.villianAlive) {
-                this.heroAttackPower += this.heroBaseAttackPower;
+            if (this.newVillianAlive) {
+                this.newHero.curAttackPower += this.newHero.baseAttackPower;
             };
-
-
-
-            // hero dead yet? 
-            if (this.heroHealth <= 0) {
-                this.heroAlive = false;
-                console.log("You got your but whooped")
-            }
 
         } else {
             console.log("Sorry, you are dead")
