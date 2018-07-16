@@ -1,45 +1,56 @@
 // csv to json , created listed in excel and saved as csv 
 // https://www.csvjson.com/csv2json
 
-var characterList = [
+var PlayerList = [
     {
-        "name": "Konnor",
+        "name": "Konor",
         "descripton": "",
         "baseAttackPower": 10,
+        "curAttackPower": 10,
         "baseHealth": 100,
-        "counter": 10
+        "curHealth": 100,
+        "counterAttack": 10
     },
     {
         "name": "Farrah",
         "descripton": "",
         "baseAttackPower": 6,
+        "curAttackPower": 6,
         "baseHealth": 100,
-        "counter": 6
+        "curHealth": 100,
+        "counterAttack": 6
     },
     {
         "name": "Mommy",
         "descripton": "",
         "baseAttackPower": 18,
+        "curAttackPower": 18,
         "baseHealth": 100,
-        "counter": 18
+        "curHealth": 100,
+        "counterAttack": 18
     },
     {
         "name": "Daddy",
         "descripton": "",
         "baseAttackPower": 25,
+        "curAttackPower": 25,
         "baseHealth": 100,
-        "counter": 25
+        "curHealth": 100,
+        "counterAttack": 25
     }
-];
-
+]
 
 // initialize global varaibles
-var enemyList = characterList.slice();  // make copy of array
+var activePlayerList = PlayerList.slice();  // make copy of array, one character
 var match = new Fight();
 var hero = {};
 var badguy = {};
+var defeatedList = [];
 
-// draw function
+//////////////////////////////////////////////////////////////////////////////////
+// draw functions are used to update the screen. They are called by the functions in onclick
+//
+
 function drawCharList(userList, divID) {
     // draw something with attribute of "fighterId" with value of array index for jquery
     var htmlstring = ""
@@ -60,38 +71,42 @@ function drawDefender(divID) {
     htmlstring = "<div class='row'> Defender: <button> " + badguy.name + "</button> </div>";
     htmlstring = htmlstring + '<div class="row"><button id="attack">ATTACK</button></div>';
     $(divID).html(htmlstring);
-    
+
 }
 
 // draw row of enemy
 function drawEnemyRow(divID) {
     // draw something with attribute of "badguyId" with value of array index for jquery
     var htmlstring = ""
-    for (var i = 0; i < enemyList.length; i++) {
-        htmlstring = htmlstring + "<div class='col-sm-2'><button class='badguy' badguyId = '" + i + "'>" + enemyList[i].name + "</button></div>";
+    for (var i = 0; i < activePlayerList.length; i++) {
+        htmlstring = htmlstring + "<div class='col-sm-2'><button class='badguy' badguyId = '" + i + "'>" + activePlayerList[i].name + "</button></div>";
     }
     $(divID).html(htmlstring);
 }
 
+//////////////////////////////////////////////////////////////////////////////////
+//  Below select functions are the onclick responses
+//
 // select hero function 
 function selectHero() {
     // game screen state 1:  
 
-    console.log("---> select hero function")
-
+    console.log("---> select hero function");
+    console.log("BEFORE: ", activePlayerList);
     // extract hero id from attrivute figherId of clicked object
     fighterId = parseInt($(this).attr("fighterId"));
+    console.log("fighterId: ", fighterId)
 
     // set Hero global variable for battle 
-    hero = characterList[fighterId];
+    hero = PlayerList[fighterId];
     match.enterHero(hero);
     console.log("fighter ", hero)
 
-    // update enemyList by remvoing hero character
+    // update activePlayerList by remvoing hero character
     // enemy list is a copy of characterlist
-    console.log("BEFORE: ", enemyList);
-    enemyList.splice(fighterId, 1);
-    console.log("AFTER: ", enemyList);
+
+    activePlayerList.splice(fighterId, 1);
+    console.log("AFTER: ", activePlayerList);
 
     // draw hero row 
     drawHero("#herorow");
@@ -111,13 +126,13 @@ function selectBadGuy() {
     badguyId = parseInt($(this).attr("badguyId"));
 
     // set Hero global variable for battle 
-    badguy = enemyList[badguyId];
+    badguy = activePlayerList[badguyId];
     match.enterVillian(badguy);
     console.log("defender", badguy)
 
-    // update enemyList by extracting selected badguy
-    enemyList.splice(badguyId, 1);
-    console.log(enemyList);
+    // update activePlayerList by extracting selected badguy
+    activePlayerList.splice(badguyId, 1);
+    console.log(activePlayerList);
 
     // draw defender row, this is the bad guy line
     drawDefender("#defender");
@@ -128,36 +143,38 @@ function selectBadGuy() {
 
 }
 
-
 // attack function
-function attack() {
+function selectAttack() {
     // game screen state 3:  
     console.log("----> attack function")
- 
+
     if (match.heroAlive) {
         if (match.villianAlive) {
             // attack
             match.heroAttack();
         } else {
-            alert ("You beat him already!");
-        }    
+            alert("You beat him already!");
+            defeatedList.push(badguy);
+        }
     } else {
         if (!match.villianAlive) {
             alert("Wow!  You died AND your opponent died!  What a battle! ")
         } else {
-            alert ("Sorry you aren't alive! ");
+            alert("Sorry you aren't alive! ");
         }
-        
+
     }
 
 
 }
 
+
 // reset game
-function resetGame(list, divID) {
-    console.log("hero: ", hero);
-    console.log("bad guy: ",badguy);
-    enemyList = characterList.slice();
+function resetGame() {
+    list = PlayerList;
+    divID = "#herorow";
+
+    activePlayerList = list.slice();
     drawCharList(list, divID);
     match = new Fight();
     match.init();
@@ -167,84 +184,77 @@ function resetGame(list, divID) {
     $('#defender').html("");
 }
 
+//////////////////////////////////////////////////////////////////////////////////
+//   setup the onclick functions 
+// 
 
 $(document).ready(function () {
 
     console.log("Testing Javascript Load");
-    console.log(characterList);
-    console.log(enemyList);
+    console.log(PlayerList);
+    console.log(activePlayerList);
 
     // fight below example
     /*
     match.init();
-    hero = characterList[0];
-    badguy = characterList[1];
+    hero = PlayerList[0];
+    badguy = PlayerList[1];
     match.enterHero(hero);
     match.enterVillian(badguy);
     */
-    
 
     // reset name with the characters specified
-    resetGame(characterList, "#herorow");
+    resetGame();
 
-    // bind event handlers
+    // rebind event handlers
     bindEventHandlers();
 
-    // reset event handler
-    $('body').on("click", '#restart', function () { 
-        console.log("----> reset function")
-        console.log("before: ",enemyList)
-        enemyList = characterList.slice();
-        resetGame(characterList, "#herorow");
-        console.log("after: ",enemyList);
-        // rebind event handlers, the event lost seems lost when I rewrote the page
+
+    $('body').on("click", '#restart', function () {
+        resetGame();
         bindEventHandlers();
+
     });
 
 
-    // event handler function, call this again to reconnect event handler on reset
     function bindEventHandlers() {
+        // click event handler rebinding, call this again when resetting.   The on and off feature 
+        // will cause it to unbind (off) to the old elements and rebind (on) to the newly rebuilt
+        // elements.  Even though the new elements have the same name.  
+        // without this, the onclick functiosn may not work correctly.
+        // this fixed a lot of wierd issues on the reset click function was bound 
+        // to elements that the javascript/jquery may have overwritten
 
-        console.log("Event Handlers rebinded! ");
+        console.log("Removing and Rebinding click event handlers");
 
         // click to select Hero, hero variable is assigned in there
-        $('body',).on("click",".fighter", selectHero);
+        $('body').off("click", ".fighter", selectHero);
+        $('body').on("click", ".fighter", selectHero);
+
+        // click to selectbadguy
+        $('body').off("click", "#enemyRow > div > button.badguy", selectBadGuy);
+        $('body').on("click", "#enemyRow > div > button.badguy", selectBadGuy);
+
+        // click to attack        
+        $('body').off("click", '#attack', selectAttack);
+        $('body').on("click", '#attack', selectAttack);
 
         // click for heroclick
         // binding created when element is created
         // hhttps://stackoverflow.com/questions/10920355/attaching-click-event-to-a-jquery-object-not-yet-added-to-the-dom
         var heroclick = 0;
         $('body').on("click", "#herorow > div > button.herohere", function () {
-            console.log("heroclick "+heroclick+"!") ;
+            console.log("heroclick " + heroclick + "!");
             heroclick++;
         });
 
-        // click to selectbadguy
-        $('body').on("click", "#enemyRow > div > button.badguy", selectBadGuy);
-
-        // click to attack 
-        /*
-        var attackcount = 0;
-        $('body').on("click", '#attack',function () {
-            console.log("Attack "+attackcount+"!") ;
-            attackcount++;
-        });
-        */
-        
-        $('body').on("click", '#attack', attack);
-        
     }
-
-
-
-
 
 });
 
 
 
-
-// bare bone game
+////  raw algorithm for the game.    
 
 function Fight() {
 
@@ -253,17 +263,16 @@ function Fight() {
         this.heroAttackPower = 0;  // will increase
         this.heroBaseHealth = 0;
         this.heroHealth = 0;   // will decrease
-        this.heroCounter = 0
+        this.heroCounterAttack = 0
 
         this.villianBaseAttackPower = 0;
         this.villianAttackPower = 0;  // will increase with battle
         this.villianBaseHealth = 0;
         this.villianHealth = 0;  // will derease
-        this.villianCounter = 0
+        this.villianCounterAttack = 0
 
-        this.heroAlive = true;
-        this.villianAlive = true;
-        console.log(this);
+        this.heroAlive = false;
+        this.villianAlive = false;
     }
 
     this.enterHero = function (hero) {
@@ -271,19 +280,23 @@ function Fight() {
         this.heroAttackPower = hero.baseAttackPower;
         this.heroBaseHealth = hero.baseHealth;
         this.heroHealth = hero.baseHealth;
-        this.heroCounter = hero.counter;
+        this.heroCounterAttack = hero.counterAttack;
 
         this.heroAlive = true;
         console.log("hero is: ", hero);
     }
 
+    this.updateStats = function () {
+        hero.curAttackPower = this.heroAttackPower
+        hero.curHealth = this.heroHealth 
+    }
 
     this.enterVillian = function (villian) {
         this.villianBaseAttackPower = villian.baseAttackPower;
         this.villianAttackPower = villian.baseAttackPower;
         this.villianBaseHealth = villian.baseHealth;
         this.villianHealth = villian.baseHealth;
-        this.villianCounter = villian.counter;
+        this.villianCounterAttack = villian.counterAttack;
 
         this.villianAlive = true;
 
@@ -295,14 +308,20 @@ function Fight() {
             // hero attacks
             this.villianHealth -= this.heroAttackPower;
 
+            // mark hero as dead if his healthpoint is <= 1
+            if (this.villianHealth <= 0) {
+                this.villianAlive = false;
+                console.log("YOu killed the bad guy!")
+            }
+
             // villiancounters only if he is alive (this will allow for overkill)
             if (this.villianAlive) {
-                this.heroHealth -= this.villianCounter;
+                this.heroHealth -= this.villianCounterAttack;
             }
 
 
             // log results
-            console.log("hero attack: " + this.heroAttackPower + " villian attack: " + this.villianCounter);
+            console.log("hero attack: " + this.heroAttackPower + " villian attack: " + this.villianCounterAttack);
             console.log("hero health: " + this.heroHealth + "  villian health: " + this.villianHealth);
 
             // hero attack becomes stronger only if villian is alive (allow for overkill)
@@ -312,11 +331,6 @@ function Fight() {
             };
 
 
-            // villian dead yet?   
-            if (this.villianHealth <= 0) {
-                this.villianAlive = false;
-                console.log("YOu killed the bad guy!")
-            }
 
             // hero dead yet? 
             if (this.heroHealth <= 0) {

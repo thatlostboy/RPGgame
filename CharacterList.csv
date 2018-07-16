@@ -1,5 +1,5 @@
-﻿Name ,descripton,baseAttackPower,baseHealth,counter
-Konor,,10,100,10
-Farrah,,6,100,6
-Mommy,,18,100,18
-Daddy,,25,100,25
+﻿name ,descripton,baseAttackPower,curAttackPower, baseHealth, curHealth, counterAttack
+Konor,,10,10,100,100,10
+Farrah,,6,6,100,100,6
+Mommy,,18,18,100,100,18
+Daddy,,25,25,100,100,25
