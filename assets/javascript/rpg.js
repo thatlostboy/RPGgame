@@ -3,28 +3,28 @@
 
 var characterList = [
     {
-        "Name": "Konnor",
+        "name": "Konnor",
         "descripton": "",
         "baseAttackPower": 10,
         "baseHealth": 100,
         "counter": 10
     },
     {
-        "Name": "Farrah",
+        "name": "Farrah",
         "descripton": "",
         "baseAttackPower": 6,
         "baseHealth": 100,
         "counter": 6
     },
     {
-        "Name": "Mommy",
+        "name": "Mommy",
         "descripton": "",
         "baseAttackPower": 18,
         "baseHealth": 100,
         "counter": 18
     },
     {
-        "Name": "Daddy",
+        "name": "Daddy",
         "descripton": "",
         "baseAttackPower": 25,
         "baseHealth": 100,
@@ -33,12 +33,8 @@ var characterList = [
 ];
 
 
-// copy of character list, will remove from this array each enemy as they are defeated
-// used copy because will be remove items when selecting enemys, a shallow copy will remove from both arrays
-// https://medium.com/@gamshan001/javascript-deep-copy-for-array-and-object-97e3d4bc401a
-var enemyList = Array.from(characterList);
-
 // initialize global varaibles
+var enemyList = characterList.slice();  // make copy of array
 var match = new Fight();
 var hero = {};
 var badguy = {};
@@ -48,46 +44,54 @@ function drawCharList(userList, divID) {
     // draw something with attribute of "fighterId" with value of array index for jquery
     var htmlstring = ""
     for (var i = 0; i < userList.length; i++) {
-        htmlstring = htmlstring + "<div class='col-lg-1'><button class='fighter' fighterId = '" + i + "'>" + userList[i].Name + "</button></div>"
+        htmlstring = htmlstring + "<div class='col-sm-2'><button class='fighter' fighterId = '" + i + "'>" + userList[i].name + "</button></div>"
     }
     $(divID).html(htmlstring);
 }
 
+// draw hero on screen
 function drawHero(divID) {
 
-    $(divID).html("<div class='col-lg-2'> Hero: <button class='herohere'> " + hero.Name + "</button> </div>");
+    $(divID).html("<div class='col-sm-2'> Hero: <button class='herohere'> " + hero.name + "</button> </div>");
 }
 
+// draw badguy / defeinder on screen
 function drawDefender(divID) {
-
-    $(divID).html("<div class='col-lg-2'> defender: <button> " + badguy.Name + "</button> </div>");
+    htmlstring = "<div class='row'> Defender: <button> " + badguy.name + "</button> </div>";
+    htmlstring = htmlstring + '<div class="row"><button id="attack">ATTACK</button></div>';
+    $(divID).html(htmlstring);
+    
 }
 
+// draw row of enemy
 function drawEnemyRow(divID) {
     // draw something with attribute of "badguyId" with value of array index for jquery
     var htmlstring = ""
     for (var i = 0; i < enemyList.length; i++) {
-        htmlstring = htmlstring + "<div class='col-lg-1'><button class='badguy' badguyId = '" + i + "'>" + enemyList[i].Name + "</button></div>";
+        htmlstring = htmlstring + "<div class='col-sm-2'><button class='badguy' badguyId = '" + i + "'>" + enemyList[i].name + "</button></div>";
     }
     $(divID).html(htmlstring);
 }
 
+// select hero function 
 function selectHero() {
     // game screen state 1:  
 
-    console.log("I am in the selectHero Function!")
+    console.log("---> select hero function")
 
     // extract hero id from attrivute figherId of clicked object
     fighterId = parseInt($(this).attr("fighterId"));
 
     // set Hero global variable for battle 
     hero = characterList[fighterId];
+    match.enterHero(hero);
     console.log("fighter ", hero)
 
-    // update enemylist by remvoing hero character
+    // update enemyList by remvoing hero character
     // enemy list is a copy of characterlist
+    console.log("BEFORE: ", enemyList);
     enemyList.splice(fighterId, 1);
-    console.log(enemyList);
+    console.log("AFTER: ", enemyList);
 
     // draw hero row 
     drawHero("#herorow");
@@ -98,32 +102,72 @@ function selectHero() {
     console.log("I am done here in selectHero")
 }
 
+// select bad guy function
 function selectBadGuy() {
     // game screen state 2:  
-    console.log("I am in the selectBadGuy Function!")
+    console.log("---> select villian")
 
     // extract hero id from attrivute figherId of clicked object
     badguyId = parseInt($(this).attr("badguyId"));
 
     // set Hero global variable for battle 
     badguy = enemyList[badguyId];
-    console.log("defener", badguy)
+    match.enterVillian(badguy);
+    console.log("defender", badguy)
 
-    // update enemylist by extracting selected badguy
+    // update enemyList by extracting selected badguy
     enemyList.splice(badguyId, 1);
     console.log(enemyList);
 
-    // draw defender row 
-    console.log("Add in function here!  ")
+    // draw defender row, this is the bad guy line
+    drawDefender("#defender");
+    console.log("Add in function here!  ");
+
+    // draw enemy list (updates with character gone)
+    drawEnemyRow('#enemyRow');
 
 }
 
+
+// attack function
+function attack() {
+    // game screen state 3:  
+    console.log("----> attack function")
+ 
+    if (match.heroAlive) {
+        if (match.villianAlive) {
+            // attack
+            match.heroAttack();
+        } else {
+            alert ("You beat him already!");
+        }    
+    } else {
+        if (!match.villianAlive) {
+            alert("Wow!  You died AND your opponent died!  What a battle! ")
+        } else {
+            alert ("Sorry you aren't alive! ");
+        }
+        
+    }
+
+
+}
+
+// reset game
 function resetGame(list, divID) {
+    console.log("hero: ", hero);
+    console.log("bad guy: ",badguy);
+    enemyList = characterList.slice();
     drawCharList(list, divID);
+    match = new Fight();
+    match.init();
+    hero = {};
+    badguy = {};
+    $('#enemyRow').html("Hero Row");
+    $('#defender').html("");
 }
 
 
-// in state1:  wait for elements to load to attach click handlers
 $(document).ready(function () {
 
     console.log("Testing Javascript Load");
@@ -131,95 +175,76 @@ $(document).ready(function () {
     console.log(enemyList);
 
     // fight below example
+    /*
     match.init();
     hero = characterList[0];
     badguy = characterList[1];
     match.enterHero(hero);
     match.enterVillian(badguy);
+    */
+    
 
+    // reset name with the characters specified
+    resetGame(characterList, "#herorow");
 
-    resetGame(characterList, "#charlist");
+    // bind event handlers
+    bindEventHandlers();
 
-    // click to select Hero, hero variable is assigned in there
-    $(".fighter").on("click", selectHero);
-
-
-    // click for heroclick
-    var heroclick = 0;
-    $(".herohere").on("click", function () {
-        console.log("heroclick "+heroclick+"!") ;
-        heroclick++;
+    // reset event handler
+    $('body').on("click", '#restart', function () { 
+        console.log("----> reset function")
+        console.log("before: ",enemyList)
+        enemyList = characterList.slice();
+        resetGame(characterList, "#herorow");
+        console.log("after: ",enemyList);
+        // rebind event handlers, the event lost seems lost when I rewrote the page
+        bindEventHandlers();
     });
 
 
-    // click to attack 
-    var attackcount = 0;
-    $("#attack").on("click", function () {
-        console.log("Attack "+attackcount+"!") ;
-        attackcount++;
-    });
-    /// click to reset
-    var restartcount = 0;
-    $("#restart").on("click", function () { 
-        console.log("Restart "+restartcount+"!") ;
-        restartcount++;
-    });
+    // event handler function, call this again to reconnect event handler on reset
+    function bindEventHandlers() {
+
+        console.log("Event Handlers rebinded! ");
+
+        // click to select Hero, hero variable is assigned in there
+        $('body',).on("click",".fighter", selectHero);
+
+        // click for heroclick
+        // binding created when element is created
+        // hhttps://stackoverflow.com/questions/10920355/attaching-click-event-to-a-jquery-object-not-yet-added-to-the-dom
+        var heroclick = 0;
+        $('body').on("click", "#herorow > div > button.herohere", function () {
+            console.log("heroclick "+heroclick+"!") ;
+            heroclick++;
+        });
+
+        // click to selectbadguy
+        $('body').on("click", "#enemyRow > div > button.badguy", selectBadGuy);
+
+        // click to attack 
+        /*
+        var attackcount = 0;
+        $('body').on("click", '#attack',function () {
+            console.log("Attack "+attackcount+"!") ;
+            attackcount++;
+        });
+        */
+        
+        $('body').on("click", '#attack', attack);
+        
+    }
 
 
-
-});
-
-// in state2:  wait for elements to load to attach new click handlers
-$(document).ready(function () {
-
-    console.log("Testing Javascript Load");
-    console.log(characterList);
-    console.log(enemyList);
-
-    // fight below example
-    match.init();
-    hero = characterList[0];
-    badguy = characterList[1];
-    match.enterHero(hero);
-    match.enterVillian(badguy);
-
-
-    resetGame(characterList, "#charlist");
-
-    // click to select Hero, hero variable is assigned in there
-    $(".fighter").on("click", selectHero);
-
-
-    // click for heroclick
-    // binding created when element is created
-    // https://stackoverflow.com/questions/10262902/how-do-i-find-out-what-javascript-runs-when-i-click-an-element
-    var heroclick = 0;
-    $('body').on("click", "#herorow > div > button.herohere", function () {
-        console.log("heroclick "+heroclick+"!") ;
-        heroclick++;
-    });
-
-    // click to selectbadguy
-    $('body').on("click", "#enemyRow > div > button.badguy", selectBadGuy);
-
-    // click to attack 
-    var attackcount = 0;
-    $("#attack").on("click", function () {
-        console.log("Attack "+attackcount+"!") ;
-        attackcount++;
-    });
-    /// click to reset
-    var restartcount = 0;
-    $("#restart").on("click", function () { 
-        console.log("Restart "+restartcount+"!") ;
-        restartcount++;
-    });
 
 
 
 });
 
 
+
+
+// bare bone game
 
 function Fight() {
 
