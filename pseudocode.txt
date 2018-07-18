@@ -1,147 +1,30 @@
+RPG Game: incomplete
+It's 90% complete.  The rest of the work is mostly cosmetic.  
+
+
+###### Psuedo Code for what the costmetic items remaining for you. 
+1)  show starting health in each of the character buttons (right now it's in console and in the charcter object, but not displayed. )
+2)  show selections in div with images instead of the buttons (need to select a nicer image, thiking mario bros)
+        was going to use flexbox container, wrap feature, spacing parameter, and centered.   
+        was going to add a hover to animate to engarge when hovered over selecting the characters
+        div inside each box was going to be relative positioning (inside the flex box container), and do absolute positiong for text element like the character.baseHealth
+3)  disable click functionality to the select another villian when in current fight (right now, the clicking for the villians is not disabled during a fight, i need to disable it)
+4)  display the fight stats (attack for X points, health is down to X).  Right now the attack stats are only shown in the console.log.   Not on the screen.   
+5)  add a nice background image, audio, and some sounds. 
 
 
 
-function Fight(){
+######
+screen updates with button instead of images right now when selecting hero, villian, and attack button.    
 
-    this.heroBaseAttackPower = 0;
-    this.heroAttackPower = 0;
-    this.heroBaseHealth = 0;
-    this.heroHeath = 0;
-    
-    this.villianBaseAttackPower = 0;
-    this.villianAttackPower = 0;
-    this.villianBaseHealth = 0;
-    this.villianHeath = 0;
+#######
+characters provided in array of objects:  see "playerList" object. 
 
+#######
+algorithm for game play is provided by constructure function Fight();
 
-    this.init = function (hero, villian) {
-        this.heroBaseAttackPower = 0;
-        this.heroAttackPower = 0;
-        this.heroBaseHealth = 0;
-        this.heroHeath = 0;
-        
-        this.villianBaseAttackPower = 0;
-        this.villianAttackPower = 0;
-        this.villianBaseHealth = 0;
-        this.villianHeath = 0;
-
-    }
-
-    this.attack = function ()
-
-}
-
-
-/*
-
-
-
-    characterlist = listof character objects  // keeping orignal copy for reference.  
-
-    opponenentlist = characterlist copy  (array.slice(0))
-    //  var clone = myArray.slice(0);   to copy
-    //
-    //  to slice
-    // araylist  ["a", "b", "c", "d", "e"]
-    // newvalue = araylist.slice(0,1)
-    // newvalue = araylist.slice(0,1)[0]
-
-
-    defeatedlist = []
-
-
-create function match()
-
-
-
-    yourCharacter = object in characterlist  {
-        Name:
-        Description:
-        BaseHealthPoints:
-        BaseAttackPower: 
-        currentAttackPower:
-        CurrentHealth: 
-        CounterAttackPower:
-        strikes
-    }
-
-    yourOpponent =  object in characterlist {
-
-    }
-
-    stillAlive = True
-    MatchStarted = False
-    MatchOver = False
-    winAllMatches = False
-    strikescnt = 0;
-
-
-    function selectYourCharacter( index of character)
-        inf index > opponentlist.length, print charlist
-        slice off opponenentlist
-        assign opponenentlist[x] to yourCharacter
-
-    function selectYourOpponent(index of character)
-        inf index > opponentlist.length, print charlist
-        slice off opponenentlist
-        assign opponenentlist[x] to yourOpponent
-
-    function attackYourOpponent()
-        // yourhealth = 
-        // yourattack = 
-        // opponenthealth = 
-        // opponentcounterattack = 
-
-        // check if you have a character , else return (" you don't exist)
-        // check if you have an opponent, else return ("No opopontnet")
-        // check if MatchOver, return ()
-
-
-        // you guys both lose points by hitting each other
-        opponenthealth -= currentAttackPower
-        yourhealth -= opponent.counterAttackPower
-
-        // let's see who is still stillAlive
-        if (opponethealth <= 0) {
-            matchover = True
-        }
-
-        if (yourhealth <= 0) {
-            matchover = true 
-        }
-
-        //  if still stillAlive
-        attackpower += baseAttackPower
-
-
-
-
-
-
-
-
-
-characterlist
-
-yourCharacter
-opponent 
-
-opponenentlist
-defeatedList
-
-newRPG = new RPG()
-
-newRPG.youcharacter(A)
-newRPG.opponent(B)
-newbattle.infight = True
-if (newRPG.attack()):
-    // determine winner
-    // move opponent to defeatedlist
-
-
-
-
-*/
-
-
-
+#######
+jquery click events for 
+ - selecting characters:  each click will also trigger calls to the fight.enterHero and drawing fiunctions
+ - selecting villians: each click will also trigger calls to the fight.enterVillian algorithm and drawing fiunctions
+ - clicking attack: each click will also trigger calls to the fight.newHeroAttack algorithm and drawing fiunctions

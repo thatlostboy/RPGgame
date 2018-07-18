@@ -43,7 +43,6 @@ var playerList = [
 // initialize global varaibles
 // below was a super clever way to deep copy array of objects, just change it to json and back
 // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
-
 var activeplayerList = JSON.parse(JSON.stringify(playerList));  /// make a deep copy of original
 var match = new Fight();
 var hero = {};
@@ -63,7 +62,7 @@ function clearDefenderDiv(divID) {
 
 // clear hero row and defender row
 function clearDrawings(){
-    $('#enemyRow').html("Hero Row");
+    $('#enemyRow').html("Enemy Row");
     $('#defender').html("");
 }
 
@@ -97,6 +96,7 @@ function drawEnemyRow(divID) {
     for (var i = 0; i < activeplayerList.length; i++) {
         htmlstring = htmlstring + "<div class='col-sm-2'><button class='badguy' badguyId = '" + i + "'>" + activeplayerList[i].name + "</button></div>";
     }
+    console.log(htmlstring);
     $(divID).html(htmlstring);
 }
 
@@ -140,7 +140,7 @@ function selectBadGuy() {
     console.log("---> select villian")
 
     // extract hero id from attrivute figherId of clicked object
-    badguyId = parseInt($(this).attr("badguyId"));
+    badguyId = parseInt($(this).attr("badguyId"));  // !!!!!Marking References to display pieces
 
     // set Hero global variable for battle 
     badguy = activeplayerList[badguyId];
@@ -177,7 +177,7 @@ function selectAttack() {
             alert("you did it!  he's dead!")
             defeatedList.push(badguy);
             badguy = {};
-            clearDefenderDiv("#defender");
+            clearDefenderDiv("#defender");  // !!!!!Marking References to display pieces
             if (activeplayerList.length === 0) {
                 alert("you did it!  you killed them all!!")
             }
@@ -192,23 +192,59 @@ function selectAttack() {
 
 // reset game
 function resetGame() {
-    divID = "#herorow";
-    activeplayerList = JSON.parse(JSON.stringify(playerList));  /// make a deep copy of original
-    console.log(activeplayerList)
-    drawCharList(playerList, divID);
+
+    // make a deep copy of original by converting it to json and back.    
+    activeplayerList = JSON.parse(JSON.stringify(playerList));  
+    divID = '#herorow';
+    console.log(activeplayerList);
+    drawCharList(activeplayerList, divID);
     match = new Fight();
     match.init();
     hero = {};
     badguy = {};
     defeatedList = [];
     clearDrawings();
+    bindEventHandlers();  // release event handlers and add new ones based on selection
+}
+
+
+function bindEventHandlers() {
+    // click event handler rebinding, call this again when resetting.   The on and off feature 
+    // will cause it to unbind (off) to the old elements and rebind (on) to the newly rebuilt
+    // elements.  Even though the new elements have the same name.  
+    // without this, the onclick functiosn may not work correctly.
+    // this fixed a lot of wierd issues on the reset click function was bound 
+    // to elements that the javascript/jquery may have overwritten
+
+    console.log("Removing and Rebinding click event handlers");
+
+    // click to select Hero, hero variable is assigned in there
+    $('body').off("click", ".fighter", selectHero);
+    $('body').on("click", ".fighter", selectHero);
+
+    // click to selectbadguy
+    $('body').off("click", "#enemyRow > div > button.badguy", selectBadGuy);
+    $('body').on("click", "#enemyRow > div > button.badguy", selectBadGuy);
+
+    // click to attack        
+    $('body').off("click", '#attack', selectAttack);
+    $('body').on("click", '#attack', selectAttack);
+
+    // click for heroclick
+    // binding created when element is created
+    // hhttps://stackoverflow.com/questions/10920355/attaching-click-event-to-a-jquery-object-not-yet-added-to-the-dom
+    var heroclick = 0;
+    $('body').on("click", "#herorow > div > button.herohere", function () {
+        console.log("heroclick " + heroclick + "!");
+        heroclick++;
+    });
 
 }
 
 
 
 //////////////////////////////////////////////////////////////////////////////////
-//   setup the onclick functions 
+//   setup the onclick functions for the game
 // 
 
 $(document).ready(function () {
@@ -217,59 +253,30 @@ $(document).ready(function () {
     console.log(playerList);
     console.log(activeplayerList);
 
-    // reset name with the characters specified
+    // reset name
     resetGame();
 
-    // rebind event handlers
-    bindEventHandlers();
-
-
-    $('body').on("click", '#restart', function () {
-        resetGame();
-        bindEventHandlers();  // release event handlers and add new ones based on selection
-    });
-
-
-    function bindEventHandlers() {
-        // click event handler rebinding, call this again when resetting.   The on and off feature 
-        // will cause it to unbind (off) to the old elements and rebind (on) to the newly rebuilt
-        // elements.  Even though the new elements have the same name.  
-        // without this, the onclick functiosn may not work correctly.
-        // this fixed a lot of wierd issues on the reset click function was bound 
-        // to elements that the javascript/jquery may have overwritten
-
-        console.log("Removing and Rebinding click event handlers");
-
-        // click to select Hero, hero variable is assigned in there
-        $('body').off("click", ".fighter", selectHero);
-        $('body').on("click", ".fighter", selectHero);
-
-        // click to selectbadguy
-        $('body').off("click", "#enemyRow > div > button.badguy", selectBadGuy);
-        $('body').on("click", "#enemyRow > div > button.badguy", selectBadGuy);
-
-        // click to attack        
-        $('body').off("click", '#attack', selectAttack);
-        $('body').on("click", '#attack', selectAttack);
-
-        // click for heroclick
-        // binding created when element is created
-        // hhttps://stackoverflow.com/questions/10920355/attaching-click-event-to-a-jquery-object-not-yet-added-to-the-dom
-        var heroclick = 0;
-        $('body').on("click", "#herorow > div > button.herohere", function () {
-            console.log("heroclick " + heroclick + "!");
-            heroclick++;
-        });
-
-    }
+    $('body').on("click", '#restart', resetGame);
 
 });
 
 
-
-////  raw algorithm for the game.    
+//////////////////////////////////////////////////////////////
+////  basic algorithm for game
 
 function Fight() {
+
+    /*   format of player object expected, an associative array
+    {
+        "name": "Konor",
+        "descripton": "",
+        "baseAttackPower": 4,
+        "curAttackPower": 4,
+        "baseHealth": 100,
+        "curHealth": 100,
+        "counterAttack": 4,
+    },
+    */
 
     this.init = function () {
         this.newHero = {}
@@ -312,7 +319,7 @@ function Fight() {
                 this.newHero.curHealth -= this.newVillianCounterAttack;
             }
 
-            // is hero dead yet? 
+            // did hero survive the counter attack? 
             if (this.newHero.curHealth <= 0) {
                 this.newHeroAlive = false;
                 console.log("You got your but whooped")
